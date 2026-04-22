@@ -1,0 +1,14 @@
+{
+  "appId": "com.biztask.app",
+  "appName": "BizTask",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Badge": {
+      "persist": true,
+      "autoClear": false
+    }
+  }
+}

@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Hàm kiểm tra xem document có chứa companyId không khi tạo mới
+    function hasCompanyId() {
+      return request.resource.data.keys().hasAny(['companyId']) 
+             && request.resource.data.companyId != "";
+    }
+
+    // Danh sách các bảng (collections) hợp lệ của app BizTask (trừ users)
+    function isValidCollection(col) {
+      return col in [
+        'tasks', 'partners', 'products', 'partner_transactions', 
+        'customers', 'payment_categories', 'customer_transactions', 
+        'finance_categories', 'salary_config', 'attendance', 
+        'advance_payments', 'payrolls', 'employee_salary_info', 
+        'payroll_locks', 'row_tags', 'inventoryItems', 
+        'inventoryTransactions', 'inventoryCheckLogs'
+      ];
+    }
+
+    // Khóa toàn bộ database mặc định (Chặn bot tạo bảng rác ở các subcollection)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Áp dụng cho các collection ở root level
+    match /{collectionName}/{docId} {
+      
+      // ==========================================
+      // 1. Collection 'users' (Đặc biệt)
+      // ==========================================
+      // Cho phép đọc/sửa/xóa nếu có companyId HOẶC companyName (dùng lúc login)
+      allow read, update, delete: if collectionName == 'users' 
+                                  && (resource.data.companyId != null || resource.data.companyName != null);
+      allow create: if collectionName == 'users' && hasCompanyId();
+
+      // ==========================================
+      // 2. Các Collection còn lại trong danh sách
+      // ==========================================
+      // Bắt buộc phải có companyId
+      allow read, update, delete: if isValidCollection(collectionName) 
+                                  && resource.data.companyId != null;
+      allow create: if isValidCollection(collectionName) && hasCompanyId();
+    }
+  }
+}

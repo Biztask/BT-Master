@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>BizTask - Quản Lý Doanh Nghiệp Toàn Diện</title>
+    
+    <!-- === CRITICAL FIX FOR IOS: POLYFILLS === -->
+    <!-- iOS WebKit rất khắt khe với các biến môi trường Node.js -->
+    <script>
+      // 1. Fix lỗi 'global is not defined'
+      if (typeof global === 'undefined') {
+        window.global = window;
+      }
+      
+      // 2. Fix lỗi 'process is not defined' (Thường gặp do Firebase/GenAI)
+      if (typeof process === 'undefined') {
+        window.process = {
+          env: { NODE_ENV: 'production' },
+          nextTick: function(col) { setTimeout(col, 0); }
+        };
+      }
+
+      // 3. Fix lỗi 'Cannot set property fetch of #<Window> which has only a getter'
+      // Sử dụng cơ chế Getter/Setter để cho phép các thư viện (như Eruda/Firebase) ghi đè fetch
+      (function() {
+        try {
+          var _fetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() { return _fetch; },
+            set: function(v) { _fetch = v; }
+          });
+        } catch (e) {
+          console.error("Critical: Fetch patch failed", e);
+        }
+      })();
+    </script>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+    
+    <!-- iOS Specific PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BizTask" />
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Updated Icons -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
+    "vite": "https://aistudiocdn.com/vite@^7.2.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "@capacitor/core": "https://esm.sh/@capacitor/core@^8.0.0",
+    "@capawesome/capacitor-badge": "https://esm.sh/@capawesome/capacitor-badge@^7.0.1",
+    "xlsx": "https://esm.sh/xlsx@^0.18.5"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-50 text-gray-900 h-[100dvh] overflow-hidden flex flex-col">
+    <div id="root" class="h-full flex flex-col"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
