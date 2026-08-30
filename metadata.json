@@ -1,0 +1,8 @@
+{
+  "name": "BizTask - Quản Lý Doanh Nghiệp Toàn Diện",
+  "description": "Ứng dụng quản lý công việc doanh nghiệp. Giao việc , quản lý thu chi và công nợ đối tác, khách hàng. Tính lương nhân viên",
+  "permissions": [],
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
